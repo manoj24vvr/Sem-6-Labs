@@ -1,0 +1,398 @@
+Q.1)
+
+
+
+_______________________________________________
+
+Q.2) 	Write a OpenMP program to calculate pow(i,x) for all the threads where i is an integer value and x is the thread_Id.
+
+
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#include <time.h>
+#include<math.h>
+int main()
+{
+	clock_t start, end;
+	double t_par;
+	double result;
+	double t_seq;
+	start = clock();
+	for (double i = 0; i < 3; i++)
+		{
+			double x = omp_get_thread_num();
+			result = pow(i, x);
+			printf("%lf ", result);
+		}
+	end = clock();
+	t_seq = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\n");
+	start = clock();
+#pragma omp parallel num_threads(5)
+	{	double x = omp_get_thread_num();
+	double i = 0;
+	for (i = 1; i <= 3; i++)
+	{
+		result = pow(i, x);
+		printf("%lf ", result);
+	}
+	}
+	end = clock();
+	t_par = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\nTime taken for sequential execution:%f\n", t_seq);
+	printf("Time taken for parallel execution:%f\n", t_par);
+
+	double speed_up = 0;
+	speed_up = (t_seq) / (t_par);
+	printf("SpeedUp:%f\n", speed_up);
+
+	double efficiency = 0;
+	int num_threads = 8;
+	efficiency = (speed_up) / (num_threads);
+	printf("Efficiency:%f\n", efficiency);
+
+
+	return 0;
+}
+
+OUTPUT: 
+
+1.000000 1.000000 1.000000
+1.000000 1.000000 1.000000 1.000000 8.000000 27.000000 4.000000 9.000000 1.000000 16.000000 81.000000 1.000000 1.000000 2.000000 3.000000
+Time taken for sequential execution:0.000000
+Time taken for parallel execution:0.001000
+SpeedUp:0.000000
+Efficiency:0.000000
+
+_____________________________________________________
+
+Q.3) Write a OpenMP program that performs the sum of even numbers and odd numbers in a given input array. 
+Create a separate thread to perform the sum of even numbers and odd numbers.
+
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#include <time.h>
+#include<math.h>
+int main()
+{
+	clock_t start, end;
+	double result;
+	int n = 5;
+	int a[5];
+	printf("Enter 5 elements: ");
+	for (int i = 0; i < n; i++)
+		scanf_s("%d", &a[i]);
+	int sum_even=0, sum_odd=0;
+
+	double t_seq;
+	start = clock();
+	for (int i = 0; i < n; i++)
+	{
+		if (a[i] % 2 == 0)
+		{
+			sum_even += a[i];
+		}
+		else
+			sum_odd += a[i];
+	}
+	printf("Sequentially...\n");
+	printf("\nSum of even numbers: %d", sum_even);
+	printf("\nSum of odd numbers: %d\n", sum_odd);
+	
+	end = clock();
+	t_seq = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\nParallely...\n");
+	double t_par; int sum;
+	start = clock();
+#pragma omp parallel num_threads(2)
+	{	double x = omp_get_thread_num();
+	if (x == 1)
+	{
+		sum = 0;
+		printf("\nSum of even numbers: ");
+		for (int i = 0; i < n; i++)
+		{	
+			if (a[i] % 2 == 0)
+			{
+				sum += a[i];
+			}
+		}
+		printf("%d\n", sum);
+	}
+	else
+	{
+		sum = 0;
+		printf("\nSum of odd numbers: ");
+		for (int i = 0; i < n; i++)
+		{
+			if (a[i] % 2 != 0)
+			{
+				sum += a[i];
+			}
+		}
+		printf("%d\n", sum);
+	}
+	
+	}
+	end = clock();
+	t_par = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\nTime taken for sequential execution:%f\n", t_seq);
+	printf("Time taken for parallel execution:%f\n", t_par);
+
+	double speed_up = 0;
+	speed_up = (t_seq) / (t_par);
+	printf("SpeedUp:%f\n", speed_up);
+
+	double efficiency = 0;
+	int num_threads = 8;
+	efficiency = (speed_up) / (num_threads);
+	printf("Efficiency:%f\n", efficiency);
+
+	return 0;
+}
+
+OUTPUT: 
+
+Enter 5 elements: 1 2 3 4 5
+Sequentially...
+
+Sum of even numbers: 6
+Sum of odd numbers: 9
+
+Parallely...
+
+Sum of odd numbers: 9
+
+Sum of even numbers: 6
+
+Time taken for sequential execution:0.001000
+Time taken for parallel execution:0.001000
+SpeedUp:1.000000
+Efficiency:0.125000
+
+
+____________________________________________________
+
+Q.4) Write a OpenMP program to implement all the four basic operations of a calculator (Add, Sub, Mul, Div).
+ Create a separate thread to perform the operations.
+
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#include <time.h>
+#include<math.h>
+int main()
+{
+	clock_t start, end;
+	double t_par;
+	double result;
+	double t_seq;
+
+	printf("Enter A and B: ");
+	int a, b;
+	scanf_s("%d %d", &a, &b);
+
+	start = clock();
+	printf("\nSequentially...\n");
+	printf("a+b= %d\n", (a + b));
+	printf("a-b= %d\n", (a - b));
+	printf("a*b= %d\n", (a * b));
+	printf("a/b= %d\n", (a / b));
+	end = clock();
+	t_seq = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\n");
+	start = clock();
+#pragma omp parallel num_threads(4)
+	{	double x = omp_get_thread_num();
+		if(x==1)
+		{
+			printf("\nAddition thread\n");
+			printf("a+b= %d\n", (a + b));
+		}
+		else if (x == 2)
+		{
+			printf("\nSubtraction thread\n");
+			printf("a-b= %d\n", (a - b));
+		}
+		else if (x == 3)
+		{
+			printf("\nMultiplication thread\n");
+			printf("a*b= %d\n", (a * b));
+		}
+		else
+		{
+			printf("\nDivisiom thread\n");
+			printf("a/b= %d\n", (a / b));
+		}
+	}
+	end = clock();
+	t_par = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\nTime taken for sequential execution:%f\n", t_seq);
+	printf("Time taken for parallel execution:%f\n", t_par);
+
+	double speed_up = 0;
+	speed_up = (t_seq) / (t_par);
+	printf("SpeedUp:%f\n", speed_up);
+
+	double efficiency = 0;
+	int num_threads = 8;
+	efficiency = (speed_up) / (num_threads);
+	printf("Efficiency:%f\n", efficiency);
+
+
+	return 0;
+}
+
+OUTPUT:
+
+Enter A and B: 5 2
+
+Sequentially...
+a+b= 7
+a-b= 3
+a*b= 10
+a/b= 2
+
+
+Divisiom thread
+a/b= 2
+
+Multiplication thread
+a*b= 10
+
+Subtraction thread
+a-b= 3
+
+Addition thread
+a+b= 7
+
+Time taken for sequential execution:0.000000
+Time taken for parallel execution:0.003000
+SpeedUp:0.000000
+Efficiency:0.000000
+
+
+_____________________________________________
+
+Q.5) Write an OpenMP program to perform Arithmetic operations (Add, Sub, Mul, Div) on two vectors A and B of size 4.  
+
+
+
+
+
+
+____________________________________________________
+
+Q.6) Write a OpenMP program for generating prime numbers from a given starting number to the given ending number.
+
+#include<stdio.h>
+#include<omp.h>
+#include<stdlib.h>
+#include <time.h>
+#include<math.h>
+
+int primenumber(int number)
+{
+	int i;
+	for (i = 2; i <= number / 2; i++) {
+		if (number % i != 0)
+			continue;
+		else
+			return 1;
+	}
+	return 0;
+}
+
+int main()
+{
+	clock_t start, end;
+	double t_par;
+	double result;
+	double t_seq;
+
+	printf("Enter 2 numbers ");
+	int a, b;
+	scanf_s("%d %d", &a, &b);
+
+	start = clock();
+	printf("\nSequentially...\n");
+	printf("Prime numbers: ");
+	for (int i = a; i <= b; i++)
+	{
+		if (primenumber(i) == 0)
+			printf("%d ", i);
+	}
+	end = clock();
+	t_seq = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\n");
+	start = clock();
+#pragma omp parallel num_threads(2)
+	{	double x = omp_get_thread_num();
+	if (x == 1)
+	{
+		printf("\nThread printing primes: ");
+			for (int i = a; i <= b; i++)
+			{
+				if (primenumber(i) == 0)
+					printf("%d ", i);
+			}
+	}
+	else
+	{
+		printf("\nThread printing non primes: ");
+		for (int i = a; i <= b; i++)
+		{
+			if (primenumber(i) == 1)
+				printf("%d ", i);
+		}
+	}
+		
+	}
+	end = clock();
+	t_par = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+	printf("\nTime taken for sequential execution:%f\n", t_seq);
+	printf("Time taken for parallel execution:%f\n", t_par);
+
+	double speed_up = 0;
+	speed_up = (t_seq) / (t_par);
+	printf("SpeedUp:%f\n", speed_up);
+
+	double efficiency = 0;
+	int num_threads = 8;
+	efficiency = (speed_up) / (num_threads);
+	printf("Efficiency:%f\n", efficiency);
+
+
+	return 0;
+}
+
+OUTPUT:
+
+Enter 2 numbers 10 20
+
+Sequentially...
+Prime numbers: 11 13 17 19
+
+Thread printing non primes: 10 12 14 15 16 18 20
+Thread printing primes: 11 13 17 19
+Time taken for sequential execution:0.000000
+Time taken for parallel execution:0.001000
+SpeedUp:0.000000
+Efficiency:0.000000
+
+
+_______________________________________
+
+Q.7) Write a program in OpenMP to toggle the character of a given character array indexed by the thread_Id. Print the corresponding Thread_Id. 
+Example: suppose the string is “HeLLo”, then the output should be “hEllO”.
+
